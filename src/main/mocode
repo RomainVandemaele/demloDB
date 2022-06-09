@@ -1,0 +1,84 @@
+//ma version
+Client : id, nom, prenom, addresse_rue , adresse_numero , adresse_code_postal ,adresse_commune
+Livre : isbn , titre ,date_achat
+
+Auteur : id, nom, prenom
+EMPRUNT 11 Client, 11 Livre : date_emprunt, date_retour
+LIVREAUTEUR 1N Livre, 1N AuteurZ
+
+#isn->Livre->isbn exemple foreign key pour mocodo
+
+//correction V1
+
+Auteur: id,nom
+emprunt, 1N Client,0N Livre : _numero, dateEmprunt, dateRetour(0-1)
+Client: SSIN, nom, prenom, ad_rue , ad_numero , ad_code_postal ,ad_commune
+
+ecris, ON Livre, 1N Auteur
+Livre: isbn , titre , date_achat
+:
+
+//correction V2 : meme DB, plus conceptuel + utile pour les devs et + maintenale
+
+Client : ssin
+Livre : isbn
+Emprunt : numero
+rend, 11Emprunt, 1N Client : dateRetour
+concerne, 11Emprunt, 0N Livre
+effectue, 1N Client, 11 Emprunt : dateEmprunt
+
+
+//ex6
+Avion: imma
+Propriétaire: id,nom, n_tel, adresse
+Transaction: id, avion_id, vendeur_id, acheteur_id
+TypeAvion: nom, nom_const, puissance,nb_place
+Intervention : id
+Mecanicien :
+Pilote :
+
+TypeAvion - Pilote
+TypeAvion - Mecanicien
+Mecanicien - Intervention(repare) --ajout condition 2 meca diff CHECK/code intervention.repair.id <> intervention.check.id
+Mecanicien - Intervention(verifie)
+Avion - Intervention
+Avion - Proprietaire
+Avion - TypeAvion
+
+//ex8
+
+Marché :  nom, ville, pays, devise
+Lié, 1N Produit_financier, 1N Actualité
+Actualité : id, titre, source, description, lien, date
+:
+
+Appartient, 1N Marché, 11 Produit_financier
+Produit_financier : code, nom
+P, XX> Produit_financier, XX Action, XX Indice
+Indice :
+
+Séance : id
+Cours, 1N Produit_financier, 1N Séance : volume, cours_ouverture, cours_fermeture, cours minimal, cours maximal
+Action :
+Composé, 0N Action, 1N Indice
+
+//ex 11
+
+Article : titre, nb_pages, auteurs, auteur_principal, experts
+Présenté, 1N Session, 01 Article : heure
+Session : theme, jour, heure_debut, heure_fin, président, articles
+Entreprise :
+Bâtiment_recherche : id, nom
+
+:
+Expert : num_tel, num_tel, email, universite, article_evalué
+Université :
+Auteur principal : num_tel, num_telecopie, email
+:
+
+Personne : SSN, nom, titre, adresse
+D, XX> Personne, XX Auteur, XX Expert
+Auteur : universite, article
+T, XX> Auteur, XX Orateur, XX Auteur principal
+Orateur : cv_résume
+
