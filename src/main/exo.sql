@@ -237,3 +237,7 @@ SELECT section_id, AVG(year_result ) AS "MOYENNE", MAX(year_result) AS "Résulta
 FROM student
 GROUP BY section_id
 HAVING AVG(year_result) > 8;
+
+--CROSS JOIN tout les possiblibilité, JOIN intersection ,
+-- LEFT JOIN left table + intersection + null,
+-- RIGHT JOIN right table + intersection + null,
