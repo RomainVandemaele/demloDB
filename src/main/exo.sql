@@ -244,11 +244,11 @@ HAVING AVG(year_result) > 8;
 
 --2.5.1
 SELECT C.course_name, S.section_name, P.professor_name
-FROM  ( course C LEFT JOIN professor P on C.professor_id = P.professor_id ) LEFT JOIN section S ON P.section_id = S.section_id;
+FROM  ( course C  JOIN professor P on C.professor_id = P.professor_id )  JOIN section S ON P.section_id = S.section_id;
 
 --2.5.2
 SELECT S.section_id, S.section_name, St.last_name
-FROM section S LEFT JOIN student St on S.delegate_id = St.student_id
+FROM section S  JOIN student St on S.delegate_id = St.student_id
 ORDER BY S.section_id DESC ;
 
 --2.5.3
@@ -269,22 +269,23 @@ WHERE S.year_result >= 12;
 --2.5.6
 SELECT P.professor_name, S.section_name, C.course_name, C.course_ects
 FROM (professor P LEFT JOIN course C on P.professor_id = C.professor_id ) LEFT JOIN section S ON S.section_id = P.section_id
+--FROM (Section S JOIN professor P on S.section_id = P.section_id) LEFT JOIN Course C ON P.professor_id = C.professor_id
 ORDER BY  C.course_ects DESC;
 
 --2.5.7
 SELECT P.professor_id, SUM(C.course_ects) AS "ECTS_TOT"
 FROM (professor P LEFT JOIN course C on P.professor_id = C.professor_id )
 GROUP BY P.professor_id
-ORDER BY P.professor_id;
+ORDER BY 'ECTS_TOT' DESC;
 
 --2.5.8
 SELECT first_name, last_name, 'S'
 FROM student
-WHERE LENGTH(last_name) >= 8
+WHERE LENGTH(last_name) > 8
 UNION
 SELECT professor_name, professor_surname, 'P'
 FROM professor
-WHERE LENGTH(professor_surname) >= 8;
+WHERE LENGTH(professor_surname) > 8;
 
 --2.5.9
 SELECT section_id
@@ -305,12 +306,12 @@ WHERE last_name != 'Roberts' AND  section_id = (
 --2.6.2
 SELECT last_name, first_name, year_result
 FROM student
-WHERE year_result >= (
-    SELECT AVG(year_result)*2
+WHERE year_result > (
+    SELECT floor( AVG(year_result)) *2
     FROM student
 );
 
-SELECT floor( AVG(year_result)*2 )
+SELECT floor( AVG(year_result) ) *2
 FROM student;
 
 --2.6.3
@@ -350,16 +351,7 @@ SELECT S1.last_name, S1.first_name, S1.section_id
 FROM student S1
 WHERE section_id = (
     SELECT S.section_id
-    FROM section S JOIN student S2 ON S.section_id = S2.section_id
-    WHERE S2.last_name = 'Marceau'
-);
-
---si on considére que Marceau ne poeut être delegué de sa section mais dangereux
-SELECT S1.last_name, S1.first_name, S1.section_id
-FROM student S1
-WHERE section_id = (
-    SELECT S2.section_id
-    FROM student S2
+    FROM section S JOIN student S2 ON S.delegate_id = S2.student_id
     WHERE S2.last_name = 'Marceau'
 );
 
@@ -390,3 +382,115 @@ SELECT avgSec.SID, MAX("AVG res")
 FROM (SELECT S.section_id AS "SID", AVG(S.year_result) AS "AVG res"
       FROM student S
       GROUP BY S.section_id) AS avgSec;
+--3.1
+INSERT INTO student VALUES ( 26, 'Romain','Vandemaele','1994-10-09','rvdemael',1010,18,'EG2210');
+
+DELETE FROM student WHERE first_name = 'Romain' OR first_name = 'Tan' OR first_name = 'Aiélée';
+
+--3.2
+INSERT INTO student(student_id,first_name,birth_date,section_id,course_id)
+VALUES (27,'Tan','1990-01-01',1010,'EG2210');
+
+--3.3
+CREATE TABLE section_archives (
+                                  section_id int NOT NULL,
+                                  section_name varchar(50),
+                                  delegate_id int,
+                                  CONSTRAINT PK_section PRIMARY KEY (section_id)
+);
+
+INSERT INTO section_archives
+SELECT *
+FROM section;
+
+--3.4
+INSERT INTO student(student_id, first_name, section_id, course_id)
+VALUES (28,'Aiélée',
+        (SELECT section_id FROM student WHERE last_name = 'Reeves' AND first_name = 'Keanu' ),
+        (SELECT course_id
+         FROM course LEFT JOIN professor p on p.professor_id = course.professor_id
+         WHERE p.professor_name = 'zidda'));
+
+--3.5
+INSERT INTO section_archives
+VALUES (1530,'Administration des SI', (SELECT delegate_id FROM section_archives WHERE section_id = '1010'));
+
+--3.6
+UPDATE student
+SET course_id = 'EG2210'
+WHERE student_id = 26;
+
+--3.7
+UPDATE student
+SET last_name = 'Phan'
+WHERE student_id = 27;
+
+UPDATE student
+SET year_result = 18, login = lower(substr(first_name,1,1) || student.last_name)
+WHERE student_id = 27;
+
+--3.8
+UPDATE student
+SET year_result = 15
+WHERE section_id = 1010;
+
+--3.9
+UPDATE section_archives
+SET delegate_id = (
+    SELECT student_id
+    FROM student
+    WHERE first_name = 'Keanu' AND last_name = 'Reeves'
+)
+WHERE section_id = 1530;
+
+--3.10
+UPDATE section_archives
+SET section_name = (
+    SELECT section_name
+    FROM section_archives
+    WHERE section_id = 1320
+) ,
+    delegate_id = (
+        SELECT delegate_id
+        FROM section_archives
+        WHERE section_id = 1320
+    )
+WHERE section_id = 1530;
+
+UPDATE section_archives
+SET (section_name, delegate_id)  = (
+    SELECT section_name, delegate_id
+    FROM section_archives
+    WHERE section_id = 1320
+)
+WHERE section_id = 1530;
+
+--3.11
+UPDATE section_archives
+SET delegate_id = (
+    SELECT student_id
+    FROM student
+    WHERE first_name = 'Alyssa' AND last_name = 'Milano'
+)
+WHERE section_id = (
+    SELECT section_id
+    FROM student
+    WHERE first_name = 'Alyssa' AND last_name = 'Milano'
+);
+
+--3.12
+DELETE FROM student
+WHERE first_name='Tan' AND last_name ='Phan';
+--WHERE student_id = 27;
+
+--3.13
+DELETE FROM student
+WHERE ( first_name='Romain' AND last_name ='Vandemaele') OR ( first_name='Kim' AND last_name ='Basinger') ;
+
+--3.14
+DELETE FROM student
+WHERE  year_result < 8;
+
+--3.15
+DELETE FROM course
+WHERE professor_id IS NULL;

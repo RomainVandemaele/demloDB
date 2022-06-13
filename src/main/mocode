@@ -64,21 +64,20 @@ Composé, 0N Action, 1N Indice
 
 //ex 11
 
-Article : titre, nb_pages, auteurs, auteur_principal, experts
-Présenté, 1N Session, 01 Article : heure
-Session : theme, jour, heure_debut, heure_fin, président, articles
-Entreprise :
-Bâtiment_recherche : id, nom
-
-:
-Expert : num_tel, num_tel, email, universite, article_evalué
-Université :
 Auteur principal : num_tel, num_telecopie, email
-:
-
-Personne : SSN, nom, titre, adresse
-D, XX> Personne, XX Auteur, XX Expert
-Auteur : universite, article
 T, XX> Auteur, XX Orateur, XX Auteur principal
-Orateur : cv_résume
+Auteur : universite
+D, XX> Personne, XX Auteur, XX Expert
+Personne : SSN, nom, titre, adresse, lieuDeRecherche
 
+EcritPrincipale, 1N Auteur principal, 11 Article
+Orateur : cv_résume
+Présente, 1N Orateur, 01 Article
+Ecrit, 1N Article, 1N Auteur
+Expert : num_tel, num_tel, email
+
+Session : theme, jour, heure_debut, heure_fin, président
+Présenté, 1N Session, 01 Article : heure
+Article : titre, nb_pages
+Evalue, 1N Expert, 33 Article : note
+:
